@@ -47,6 +47,10 @@ const requestMap = newMap();
 const tabMap = newMap();
 
 // Images from spritesXX.png: [x, y, w, h]
+// 9 Is nat64 for a convoluted reason, the way the icon is built requires
+// each option to be one char. I was thinking 6+4=10, but 10 is 2 characters 
+// so i just decided 9. this is probably better solved by chaning the icon building
+// to use an array
 const spriteBig = {
   "4": {16: [1, 1, 9, 14],
         32: [1, 1, 21, 28]},
