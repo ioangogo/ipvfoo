@@ -52,12 +52,16 @@ const spriteBig = {
         32: [1, 1, 21, 28]},
   "6": {16: [11, 1, 9, 14],
         32: [23, 1, 21, 28]},
+  "9": {16: [38, 1, 9, 14],
+        32: [78, 1, 21, 28]},
   "?": {16: [21, 1, 9, 14],
         32: [45, 1, 21, 28]},
 };
 const spriteSmall = {
   "4": {16: [31, 1, 6, 6],
         32: [67, 1, 10, 10]},
+  "9": {16: [48, 1, 6, 6],
+        32: [100, 1, 10, 10]},
   "6": {16: [31, 8, 6, 6],
         32: [67, 12, 10, 10]},
 };
@@ -157,7 +161,7 @@ function drawSprite(ctx, size, targets, sources) {
 // but let's keep it simple and stick with text for now.
 function addrToVersion(addr) {
   if (addr) {
-    if (/^64:ff9b::/.test(addr)) return "4";  // RFC6052
+    if (/^64:ff9b::/.test(addr)) return "9";  // RFC6052
     if (addr.indexOf(".") >= 0) return "4";
     if (addr.indexOf(":") >= 0) return "6";
   }
@@ -341,6 +345,7 @@ TabInfo.prototype.updateIcon = function() {
   let pattern = "?";
   let has4 = false;
   let has6 = false;
+  let has9 = false;
   let tooltip = "";
   for (const domain of domains) {
     const addr = this.domains[domain].addr;
@@ -352,11 +357,13 @@ TabInfo.prototype.updateIcon = function() {
       switch (version) {
         case "4": has4 = true; break;
         case "6": has6 = true; break;
+        case "9": has9 = true; break;
       }
     }
   }
   if (has4) pattern += "4";
   if (has6) pattern += "6";
+  if (has9) pattern += "9";
 
   // Don't waste time rewriting the same tooltip.
   if (this.lastTooltip != tooltip) {
