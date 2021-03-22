@@ -161,6 +161,23 @@ function drawSprite(ctx, size, targets, sources) {
                 target[0], target[1], source[2], source[3]);
 }
 
+// This is just to aid in the bgp lookup
+function nat64To4(addr){
+  let regex= /^64:ff9b::(.*)/;
+  let match = addr.match(regex);
+  let ipvhex = match[1].replace(/:/g, "").padStart(8, '0');
+  let bin = parseInt(ipvhex, 16).toString(2);
+  let oct_split=bin.match(/.{1,8}/g);
+  legacy_addr="";
+  for (section in oct_split){
+    legacy_addr+=parseInt(oct_split[section], 2);
+    if(section!=3){legacy_addr+=".";}
+  }
+  return legacy_addr;
+
+}
+
+
 // In theory, we should be using a full-blown subnet parser/matcher here,
 // but let's keep it simple and stick with text for now.
 function addrToVersion(addr) {
@@ -798,8 +815,11 @@ const menuId = chrome.contextMenus.create({
   contexts: ["selection"],
   documentUrlPatterns: [document.location.origin + "/popup.html"],
   onclick: function(info) {
-    const text = info.selectionText;
+    var text = info.selectionText;
     if (IP_CHARS.test(text)) {
+      if (addrToVersion(text)=="9"){
+        text = nat64To4(text);
+      }
       chrome.tabs.create({url: "https://bgp.he.net/ip/" + text});
     } else if (DNS_CHARS.test(text)) {
       chrome.tabs.create({url: "https://bgp.he.net/dns/" + text});
