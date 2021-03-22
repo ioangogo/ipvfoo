@@ -166,7 +166,7 @@ function nat64To4(addr){
   let regex= /^64:ff9b::(.*)/;
   let match = addr.match(regex);
   let ipvhex = match[1].replace(/:/g, "").padStart(8, '0');
-  let bin = parseInt(ipvhex, 16).toString(2);
+  let bin = parseInt(ipvhex, 16).toString(2).padStart(32, '0');
   let oct_split=bin.match(/.{1,8}/g);
   legacy_addr="";
   for (section in oct_split){
