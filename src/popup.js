@@ -152,6 +152,7 @@ function makeRow(isFirst, tuple) {
   switch (version) {
     case "4": addrClass = " ip4"; break;
     case "6": addrClass = " ip6"; break;
+    case "64`": addrClass = " ip64"; break;
   }
   const connectedClass = (flags & FLAG_CONNECTED) ? " highlight" : "";
   addrTd.className = "ipCell" + addrClass + connectedClass;

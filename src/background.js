@@ -56,7 +56,7 @@ const spriteBig = {
         32: [1, 1, 21, 28]},
   "6": {16: [11, 1, 9, 14],
         32: [23, 1, 21, 28]},
-  "9": {16: [38, 1, 9, 14],
+  "64": {16: [38, 1, 9, 14],
         32: [78, 1, 21, 28]},
   "?": {16: [21, 1, 9, 14],
         32: [45, 1, 21, 28]},
@@ -64,7 +64,7 @@ const spriteBig = {
 const spriteSmall = {
   "4": {16: [31, 1, 6, 6],
         32: [67, 1, 10, 10]},
-  "9": {16: [48, 1, 6, 6],
+  "64": {16: [48, 1, 6, 6],
         32: [100, 1, 10, 10]},
   "6": {16: [31, 8, 6, 6],
         32: [67, 12, 10, 10]},
@@ -130,13 +130,13 @@ function buildIcon(pattern, size, color) {
   const ctx = getCanvasContext(size);
   ctx.clearRect(0, 0, size, size);
   if (pattern.length >= 1) {
-    drawSprite(ctx, size, targetBig, spriteBig[pattern.charAt(0)]);
+    drawSprite(ctx, size, targetBig, spriteBig[pattern[0]]);
   }
   if (pattern.length >= 2) {
-    drawSprite(ctx, size, targetSmall1, spriteSmall[pattern.charAt(1)]);
+    drawSprite(ctx, size, targetSmall1, spriteSmall[pattern[1]]);
   }
   if (pattern.length >= 3) {
-    drawSprite(ctx, size, targetSmall2, spriteSmall[pattern.charAt(2)]);
+    drawSprite(ctx, size, targetSmall2, spriteSmall[pattern[2]]);
   }
   const imageData = ctx.getImageData(0, 0, size, size);
   if (color == "lightfg") {
@@ -165,12 +165,15 @@ function drawSprite(ctx, size, targets, sources) {
 function nat64To4(addr){
   let regex= /^64:ff9b::(.*)/;
   let match = addr.match(regex);
-  let ipvhex = match[1].replace(/:/g, "").padStart(8, '0');
+  let hex_split = match[1].split(":");
+  for (hex in hex_split){
+    ipvhex+=hex_split[hex].padStart(4, "0")
+  }
   let bin = parseInt(ipvhex, 16).toString(2).padStart(32, '0');
   let oct_split=bin.match(/.{1,8}/g);
   legacy_addr="";
   for (section in oct_split){
-    legacy_addr+=parseInt(oct_split[section], 2);
+    legacy_addr+=parseInt(oct_split[section].padStart(4,"0"), 2);
     if(section!=3){legacy_addr+=".";}
   }
   return legacy_addr;
@@ -182,7 +185,7 @@ function nat64To4(addr){
 // but let's keep it simple and stick with text for now.
 function addrToVersion(addr) {
   if (addr) {
-    if (/^64:ff9b::/.test(addr)) return "9";  // RFC6052
+    if (/^64:ff9b::/.test(addr)) return "64";  // RFC6052
     if (addr.indexOf(".") >= 0) return "4";
     if (addr.indexOf(":") >= 0) return "6";
   }
@@ -366,25 +369,25 @@ TabInfo.prototype.updateIcon = function() {
   let pattern = "?";
   let has4 = false;
   let has6 = false;
-  let has9 = false;
+  let has64 = false;
   let tooltip = "";
   for (const domain of domains) {
     const addr = this.domains[domain].addr;
     const version = addrToVersion(addr);
     if (domain == this.mainDomain) {
-      pattern = version;
+      pattern = [version];
       tooltip = addr + " - IPvFoo";
     } else {
       switch (version) {
         case "4": has4 = true; break;
         case "6": has6 = true; break;
-        case "9": has9 = true; break;
+        case "64": has64 = true; break;
       }
     }
   }
-  if (has4) pattern += "4";
-  if (has6) pattern += "6";
-  if (has9) pattern += "9";
+  if (has4) pattern.push("4");
+  if (has6) pattern.push("6");
+  if (has64) pattern.push("64");
 
   // Don't waste time rewriting the same tooltip.
   if (this.lastTooltip != tooltip) {
@@ -399,7 +402,7 @@ TabInfo.prototype.updateIcon = function() {
   if (this.lastPattern == pattern) {
     return;
   }
-  this.lastPattern = pattern;
+  pattern.every((v,i)=> v === this.lastPattern[i]);
 
   const color = options[this.color];
   chrome.pageAction.setIcon({
@@ -817,7 +820,7 @@ const menuId = chrome.contextMenus.create({
   onclick: function(info) {
     var text = info.selectionText;
     if (IP_CHARS.test(text)) {
-      if (addrToVersion(text)=="9"){
+      if (addrToVersion(text)=="64"){
         text = nat64To4(text);
       }
       chrome.tabs.create({url: "https://bgp.he.net/ip/" + text});
