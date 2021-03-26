@@ -166,6 +166,7 @@ function nat64To4(addr){
   let regex= /^64:ff9b::(.*)/;
   let match = addr.match(regex);
   let hex_split = match[1].split(":");
+  let ipvhex="";
   for (hex in hex_split){
     ipvhex+=hex_split[hex].padStart(4, "0")
   }
@@ -366,7 +367,7 @@ TabInfo.prototype.updateIcon = function() {
     return;
   }
   const domains = Object.keys(this.domains);
-  let pattern = "?";
+  let pattern = ["?"];
   let has4 = false;
   let has6 = false;
   let has64 = false;
