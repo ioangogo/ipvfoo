@@ -20,3 +20,22 @@ const FLAG_NOSSL = 0x2;
 const FLAG_UNCACHED = 0x4;
 const FLAG_CONNECTED = 0x8;
 const FLAG_WEBSOCKET = 0x10;
+
+function nat64To4(addr){
+    let regex= /^64:ff9b::(.*)/;
+    let match = addr.match(regex);
+    let hex_split = match[1].split(":");
+    let ipvhex="";
+    for (hex in hex_split){
+      ipvhex+=hex_split[hex].padStart(4, "0")
+    }
+    let bin = parseInt(ipvhex, 16).toString(2).padStart(32, '0');
+    let oct_split=bin.match(/.{1,8}/g);
+    legacy_addr="";
+    for (section in oct_split){
+      legacy_addr+=parseInt(oct_split[section].padStart(4,"0"), 2);
+      if(section!=3){legacy_addr+=".";}
+    }
+    return legacy_addr;
+  
+  }
