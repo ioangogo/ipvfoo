@@ -130,6 +130,7 @@ function makeRow(isFirst, tuple) {
   const addr = tuple[1];
   const version = tuple[2];
   const flags = tuple[3];
+  const nat64 = tuple[4];
 
   const tr = document.createElement("tr");
   if (isFirst) {
@@ -156,19 +157,24 @@ function makeRow(isFirst, tuple) {
   }
   const connectedClass = (flags & FLAG_CONNECTED) ? " highlight" : "";
   addrTd.className = "ipCell" + addrClass + connectedClass;
-  addrTd.appendChild(document.createTextNode(addr));
-  addrTd.onclick = handleClick;
-  addrTd.oncontextmenu = handleContextMenu;
-
-  // Build the "NAT64 Address" column.
-  const addr4Td = document.createElement("td");
-  addr4Td.className = "ipCell" + connectedClass+addrClass;
+  const addrSpan = document.createElement("span")
+  addrSpan.appendChild(document.createTextNode(addr))
+  
+  addrSpan.onclick = handleClick;
+  addrSpan.oncontextmenu = handleContextMenu;
+  const addr64Span = document.createElement("span")
+  addrTd.appendChild(addrSpan);
   if (version == "64"){
-    i4addr=nat64To4(addr);
-    addr4Td.appendChild(document.createTextNode(i4addr));
-  }else{
-    addr4Td.appendChild(document.createTextNode(""));
+    addrTd.appendChild(document.createTextNode("("))
+    addr64Span.appendChild(document.createTextNode(nat64));
+    addr64Span.onclick = handleClick;
+    addr64Span.oncontextmenu = handleContextMenu;
+    addrTd.appendChild(addr64Span);
+    addrTd.appendChild(document.createTextNode(")"))
   }
+  
+  
+
 
   // Build the (possibly invisible) "WebSocket/Cached" column.
   // We don't need to worry about drawing both, because a cached WebSocket
@@ -192,7 +198,6 @@ function makeRow(isFirst, tuple) {
   tr.appendChild(domainTd);
   tr.appendChild(addrTd);
   tr.appendChild(cacheTd);
-  tr.appendChild(addr4Td);
   return tr;
 }
 

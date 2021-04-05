@@ -428,21 +428,26 @@ TabInfo.prototype.getTuples = function() {
 
   const mainDomain = this.mainDomain || "---";
   if (this.accessDenied) {
-    return [[mainDomain, "(access denied)", "?", FLAG_UNCACHED]];
+    return [[mainDomain, "(access denied)", "?", FLAG_UNCACHED, ""]];
   }
   const domains = Object.keys(this.domains).sort();
-  const mainTuple = [mainDomain, "(no address)", "?", 0];
+  const mainTuple = [mainDomain, "(no address)", "?", 0, ""];
   const tuples = [mainTuple];
   for (const domain of domains) {
     const addr = this.domains[domain].addr;
+    let nat64="";
     const version = addrToVersion(addr);
+    if(version == "64"){
+      nat64=nat64To4(addr);
+    }
     const flags = this.domains[domain].flags;
     if (domain == mainTuple[0]) {
       mainTuple[1] = addr;
       mainTuple[2] = version;
       mainTuple[3] = flags;
+      mainTuple[4] = nat64;
     } else {
-      tuples.push([domain, addr, version, flags]);
+      tuples.push([domain, addr, version, flags, nat64]);
     }
   }
   return tuples;
