@@ -21,6 +21,10 @@ const FLAG_UNCACHED = 0x4;
 const FLAG_CONNECTED = 0x8;
 const FLAG_WEBSOCKET = 0x10;
 
+bgp_lookup_providers={
+    "Hurricane Eletric":"https://bgp.he.net/"
+}
+
 function nat64To4(addr){
     let regex= /^64:ff9b::(.*)/;
     let match = addr.match(regex);

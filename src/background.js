@@ -236,7 +236,6 @@ const TabInfo = function(tabId) {
   this.lastTooltip = "";      // To avoid redundant tooltip updates.
   this.accessDenied = false;  // webRequest events aren't permitted.
   this.color = "regularColorScheme";  // ... or incognitoColorScheme.
-
   // First, clean up the previous TabInfo, if any.
   tabTracker.disconnect(tabId);
   if (tabMap[tabId]) throw "Duplicate entry in tabMap";
@@ -305,12 +304,16 @@ TabInfo.prototype.refreshPageAction = function() {
 
 TabInfo.prototype.addDomain = function(domain, addr, flags) {
   if (this.state == TAB_DELETED) throw "Impossible";
+  let nat64=""
 
   const oldDomainInfo = this.domains[domain];
   let connCount = null;
   flags |= FLAG_CONNECTED;
 
   if (!oldDomainInfo) {
+    if(addrToVersion(addr) == "64"){
+      nat64 = nat64To4(addr);
+    }
     // Limit the number of domains per page, to avoid wasting RAM.
     if (Object.keys(this.domains).length >= 256) {
       popups.pushSpillCount(this.tabId, ++this.spillCount);
@@ -325,7 +328,7 @@ TabInfo.prototype.addDomain = function(domain, addr, flags) {
       const d = that.domains[domain];
       if (d) {
         d.flags &= ~FLAG_CONNECTED;
-        popups.pushOne(that.tabId, domain, d.addr, d.flags);
+        popups.pushOne(that.tabId, domain, d.addr, d.flags, d.nat64);
       }
     });
     connCount.up();
@@ -335,6 +338,12 @@ TabInfo.prototype.addDomain = function(domain, addr, flags) {
     // Don't allow a cached IP to overwrite an actually-connected IP.
     if (!(flags & FLAG_UNCACHED) && (oldDomainInfo.flags & FLAG_UNCACHED)) {
       addr = oldDomainInfo.addr;
+    }
+
+    if (oldDomainInfo.addr != addr){
+      nat64 = nat64To4(addr);
+    }else{
+      nat64 = oldDomainInfo.nat64;
     }
     // Merge in the previous flags.
     flags |= oldDomainInfo.flags;
@@ -348,11 +357,12 @@ TabInfo.prototype.addDomain = function(domain, addr, flags) {
     addr: addr,
     flags: flags,
     connCount: connCount,
+    nat64: nat64
   };
   this.dataExists = true;
 
   this.updateIcon();
-  popups.pushOne(this.tabId, domain, addr, flags);
+  popups.pushOne(this.tabId, domain, addr, flags, nat64);
 };
 
 TabInfo.prototype.disconnectDomain = function(domain) {
@@ -435,11 +445,12 @@ TabInfo.prototype.getTuples = function() {
   const tuples = [mainTuple];
   for (const domain of domains) {
     const addr = this.domains[domain].addr;
-    let nat64="";
+    let leg_ip="";
     const version = addrToVersion(addr);
     if(version == "64"){
-      nat64=nat64To4(addr);
+      leg_ip = nat64To4(addr);
     }
+    const nat64= new String(leg_ip);
     const flags = this.domains[domain].flags;
     if (domain == mainTuple[0]) {
       mainTuple[1] = addr;
@@ -539,10 +550,10 @@ Popups.prototype.pushAll = function(tabId) {
   }
 };
 
-Popups.prototype.pushOne = function(tabId, domain, addr, flags) {
+Popups.prototype.pushOne = function(tabId, domain, addr, flags, nat64) {
   const win = this.map[tabId];
   if (win) {
-    win.pushOne([domain, addr, addrToVersion(addr), flags]);
+    win.pushOne([domain, addr, addrToVersion(addr), flags, nat64]);
   }
 };
 
