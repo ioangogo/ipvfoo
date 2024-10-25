@@ -6,7 +6,7 @@ Everything is captured privately using the webRequest API (new in Chrome 17), wi
 https://chrome.google.com/webstore/detail/ecanpcehffngcegjmadlcijfolapggal
 
 #### Screenshot:
-![Screenshot](/misc/screenshot_webstore_1280x800.png?raw=true)
+Needs new screenshot
 
 #### Firefox Support:
 IPvFoo now [runs on Firefox](https://addons.mozilla.org/en-US/firefox/addon/ipvfoo-pmarks/), but there are [a few bugs](https://github.com/pmarks-net/ipvfoo/issues/32) to work out.
