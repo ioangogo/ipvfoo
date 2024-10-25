@@ -4,7 +4,7 @@
   "version": "1.44",
   "minimum_chrome_version": "26",
   "description": "Display the server IP address, with a realtime summary of IPv4, IPv6, and HTTPS information across all page elements.",
-  "homepage_url": "https://github.com/ioangogo/ipvfoo",
+  "homepage_url": "https://github.com/miawgogo/ipvfoo",
   "icons": {
     "16": "icon16.png",
     "128": "icon128.png"
